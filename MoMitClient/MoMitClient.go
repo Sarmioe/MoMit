@@ -42,8 +42,16 @@ func main() {
 	reachableIPs := []string{}
 	for _, ip := range ips {
 		ip = strings.TrimSpace(ip)
-		if ip != "" && isValidIP(ip) && pingIP(ip) {
-			reachableIPs = append(reachableIPs, ip)
+		if ip != "" {
+			if isLoopback(ip) {
+				continue // 跳过本地环回地址
+			}
+			if !isValidIP(ip) {
+				log.Fatalf("Invalid IP address: %s", ip)
+			}
+			if pingIP(ip) {
+				reachableIPs = append(reachableIPs, ip)
+			}
 		}
 	}
 
@@ -52,6 +60,10 @@ func main() {
 		fmt.Printf("IP %d: %s\n", i+1, ip)
 	}
 	fmt.Printf("Total reachable IPs: %d\n", len(reachableIPs))
+}
+
+func isLoopback(ip string) bool {
+	return ip == "127.0.0.1" || strings.ToLower(ip) == "localhost"
 }
 
 func isValidIP(ip string) bool {
