@@ -2,7 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math/rand"
+	"net"
+	"os/exec"
+	"runtime"
+	"strings"
 	"time"
 )
 
@@ -22,6 +28,49 @@ func main() {
 	IV1(RandomIV1)
 	RandomIV2 := rand.Intn(7) + 9
 	IV2(RandomIV2)
+
+	filePath := "ip.txt"
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+	}
+
+	content := string(data)
+	fmt.Println("File content:", content)
+
+	ips := strings.Split(content, "\n")
+	reachableIPs := []string{}
+	for _, ip := range ips {
+		ip = strings.TrimSpace(ip)
+		if ip != "" && isValidIP(ip) && pingIP(ip) {
+			reachableIPs = append(reachableIPs, ip)
+		}
+	}
+
+	fmt.Println("Reachable IP addresses:")
+	for i, ip := range reachableIPs {
+		fmt.Printf("IP %d: %s\n", i+1, ip)
+	}
+	fmt.Printf("Total reachable IPs: %d\n", len(reachableIPs))
+}
+
+func isValidIP(ip string) bool {
+	return net.ParseIP(ip) != nil
+}
+
+func pingIP(ip string) bool {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("ping", "-n", "1", ip)
+	case "linux", "darwin":
+		cmd = exec.Command("ping", "-c", "1", ip)
+	default:
+		log.Fatalf("Unsupported operating system: %s", runtime.GOOS)
+	}
+
+	err := cmd.Run()
+	return err == nil
 }
 
 func IV1(RandomIV1 int) {
