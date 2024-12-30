@@ -5,7 +5,7 @@
 >
 > It uses multiple obfuscation modes, such as obfuscating into a video call in one minute and browsing a video in the next minute, etc.
 
-[中文简体](Mo Mit工作原理.md)
+[io](io.sh)
 
 ## How to it work?
 
