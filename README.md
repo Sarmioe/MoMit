@@ -128,7 +128,7 @@
 >
 > Moreover, these requests can also be protected if they face replay attacks.
 >
-> Before switching to the next data server, the client will first send a request to this server. The content is roughly: Have you finished transmitting (disguised as a Ping request)
+> Before switching to the next data server, the client will first send a request to this server. The content is roughly: Have you finished transmitting (WS Request)
 >
 > If the server says: I have finished transmitting, the client will treat it as the first server and continue to exchange keys.
 >
