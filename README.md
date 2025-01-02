@@ -1,11 +1,36 @@
 # MoMit encrypted protocol
-> This is an encrypted protocol.
->
-> Mo Mit is different from any encryption protocol such as shandowsocks, obfs4, snowflake, etc., which use a single obfuscation mode.
->
-> It uses multiple obfuscation modes, such as obfuscating into a video call in one minute and browsing a video in the next minute, etc.
 
 [中文简体](https://github.com/Sarmioe/MoMit/blob/main/Mo%20Mit%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.md)
+
+## Introducing
+
+> This is an encrypted protocol.
+>
+> MoMit is different from any encryption protocol such as shandowsocks, obfs4, snowflake, etc., which use a single obfuscation mode.
+>
+> It uses multiple obfuscation modes, such as obfuscating into a video call in one minute and browsing a video in the next minute, etc.
+>
+> Made by Golang , Why? Because it have high performance and easy learn.
+
+## How to run build?
+
+> It support using makefile(GNU Makefile) and go build to run build.
+>
+> First , you need cd into the project root folder.
+>
+> Makefile build:
+>
+> Client: make client
+>
+> Server: make server
+>
+> Clean: make debuild
+>
+> Go Build:
+>
+> Client: cd ./MoMitClient && go build ./main.go ./utils.go
+>
+> Server: cd ./MoMitServer && go build ./main.go ./utils.go
 
 ## How to it work?
 
