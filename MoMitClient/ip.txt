@@ -1,3 +1,5 @@
 It is a example file.
+you need change it to your own ip data.
+It name is ip.txt.
 ip data like this:
-ip port encrypted
+ip port publickey
