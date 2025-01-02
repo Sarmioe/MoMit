@@ -31,6 +31,8 @@
 > Client: cd ./MoMitClient && go build ./main.go ./utils.go
 >
 > Server: cd ./MoMitServer && go build ./main.go ./utils.go
+>
+> Run the "build-all.bat" or "build-all.sh" file to build the all versions.
 
 ## How to it work?
 

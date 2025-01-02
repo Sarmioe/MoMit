@@ -27,6 +27,8 @@
 > 服务端:make server
 >
 > 清理编译的二进制文件:make debuild
+>
+> 运行目录的build-all脚本
 
 ## 传输协议
 
