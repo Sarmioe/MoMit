@@ -11,7 +11,7 @@ func main() {
 		ipv4 = "Not available (IPv4 unsupported)"
 	}
 
-	ipv6, err := getIP("https://ipv6.icanhazip.com")
+	ipv6, err := getIP("https://v6.ipinfo.io/ip")
 	if err != nil {
 		logError(fmt.Errorf("Failed to get public IPv6: %w", err))
 		ipv6 = "Not available (IPv6 unsupported)"
