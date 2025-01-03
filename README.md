@@ -109,7 +109,7 @@
 
 > First, the client needs to get the server key and a server trust list
 >
-> The trust list is dynamically updated with a maximum of 10 entries at a time and a minimum of 2 entries. It can be a single IPv4 or IPv6 address. IPv6 server is recommended first. After all, there are more addresses and it is a new protocol with relatively less supervision
+> The trust list can have a maximum of 10 entries at a time and a minimum of 2 entries. It can be a single IPv4\IPv6 address. IPv4 server is recommended for deployment. After all, compared to IPV6, this thing is more stable in transmission.
 
 > 1. Communicate with the proxy server and establish a WS connection with it
 >
