@@ -15,11 +15,7 @@ func main() {
 	fmt.Println("| |\\/| |/ _ \\  | |\\/| | | __| | |   | | |/ _ \\ '_ \\| __|")
 	fmt.Println("| |  | | (_) | | |  | | | |_  | |___| | |  __/ | | | |_")
 	fmt.Println("|_|  |_|\\___/  |_|  |_|_|\\__|  \\____|_|_|\\___|_| |_|\\__|")
-	fmt.Println("Thanks for installing MoMit, it is running now.")
-	fmt.Println("It is an encryption protocol on the Internet.")
-	fmt.Println("It makes your packets look like normal Internet activity.")
-	fmt.Println("So even if a man in the middle can eavesdrop on your packets, he can't get anything.")
-	fmt.Println("It is an open source project, so you don't have to worry about being eavesdropped by MoMit.")
+	fmt.Println("Thanks for install MoMit, it is running now.")
 	rand.Seed(time.Now().UnixNano())
 	RandomIV1 := rand.Intn(8) + 1
 	IV1(RandomIV1)
