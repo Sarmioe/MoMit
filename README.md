@@ -16,7 +16,7 @@
 
 > It support using makefile(GNU Makefile) and go build to run build.
 >
-> First , you need cd into the project root folder.
+> First , you need cd into the project root folder and golang V1.23.4
 >
 > Makefile build:
 >
