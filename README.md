@@ -105,58 +105,30 @@
 >
 > And more
 
-### Simplified actual Internet operation process
+## Simplified actual Internet operation process
 
 > First, the client needs to get the server key and a server trust list
 >
-> The trust list can have a maximum of 10 entries at a time and a minimum of 2 entries. It can be a single IPv4\IPv6 address. IPv4 server is recommended for deployment. After all, compared to IPV6, this thing is more stable in transmission.
+> The trust list can have a maximum of 10 entries and a minimum of 2 entries at a time. It can be a single IPv4\IPv6 address. It is recommended to build an IPv4 server first. After all, compared with IPV6, this thing is more stable in transmission
 
-> 1. Communicate with the proxy server and establish a WS connection with it
+> 1. Communication proxy server Establish a WS connection with it. If there is a middleman tampering, immediately cut off the network (kill swithy)
 >
-> 2. Then exchange encryption keys. The key will be signed locally. Then confirm that the server is the one you want to connect to. If there is tampering by the middleman, immediately cut off the network (kill switch)
+> 2. Then start the second data packet exchange: notify the server of the random data IV1
 >
-> 3. Then start the second data packet exchange: first generate a random value locally, an IV1, and then notify the server
+> 3. After the server gets this value, it sends a received data packet to the client
 >
-> 4. After the server gets this value, it sends a received data packet to the client
+> 4. Start to negotiate the random data position (IV3). Add a few random packets for the number. The value is an integer with a maximum of 35 and a minimum of 15
 >
-> 5. After the client receives the data packet, cut off the WS connection
+> 5. The client starts random data and uses the configured encryption key as the transmission encryption of the random data position notification data packet
 >
-> 6. Use the new protocol to start transmitting data
+> 6. After the server confirms that everything is fine, the client starts random IV2
 >
-> 7. After the new protocol is negotiated, start negotiating the random data position (IV3). Add a few random packets for the number Integer with a maximum of 10 and a minimum of 1
+> 7. After IV2 is randomized After encrypting the data to the server, notify the server of IV2.
 >
-> 8. The client starts random data and uses the encryption key negotiated during the TCP protocol as the transmission encryption of the random data position notification data packet
+> 8. After the client receives the data packet, the WS connection is cut off. Server 1 notifies the encryption method used to the next server (encryption notification).
 >
-> 9. After the server confirms that everything is fine, the client starts random IV2
+> 9. Get browser data and start data packet optimization.
 >
-> 10. After IV2 is randomized, encrypt the data to the server and then notify the server of the IV2 number
+> 10. (When the time is reached) The client ends the connection with this server and opens a new connection to start connecting to this new address.
 >
-> 11. Get browser data and start using Gzip and Brotli and video compression to compress data
->
-> 12. Start deleting the preamble and interframe gap
->
-> 13. After deleting, start merging and header compression data
->
-> 14. Complete other data packet optimization work
->
-> 15. Transmit a small data packet to notify the server of the transmission mode for these few minutes
->
-> 16. Locally connect to a new IP address
->
-> 16.5. Announce the encryption method used to the next server abroad (encrypted notification)
->
-> 17. End the connection to this server and open a new connection to start connecting to this new address
->
-> 18. When the random time expires, the connection with this server will be cut off and the next server will be opened. This cycle will continue.
-
-> Note that the first few data packets are encrypted. All data of the first server are transmitted in an encrypted environment.
->
-> In addition, IV1 in the notification process is disguised as a DNS request (for example, if the random number reaches 0, the DNS result returns 0.0.0.0). IV3 is disguised as an encrypted QUIC request (for example, watching YouTube). IV2 is disguised as IMTP to read emails. The small data packet in step 14 is disguised as an encrypted NTP request and the value is wrapped in the time. It looks like a wrong time on the outside, but...
->
-> Moreover, these requests can also be protected if they face replay attacks.
->
-> Before switching to the next data server, the client will first send a request to this server. The content is roughly: Have you finished transmitting (WS Request)
->
-> If the server says: I have finished transmitting, the client will treat it as the first server and continue to exchange keys.
->
-> Then after this server has exchanged keys, the client will connect to the next server in the trust list.
+> 11. When the random time expires, the connection with this server will be cut off and the next server will be opened. This cycle continues.
