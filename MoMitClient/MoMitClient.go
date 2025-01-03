@@ -32,6 +32,10 @@ func main() {
 	fmt.Println("File content:", content)
 
 	ips := strings.Split(content, "\n")
+	if len(ips) < 2 || len(ips) > 10 {
+		log.Fatalf("Please provide between 2 and 10 IP addresses in the file.")
+	}
+
 	reachableIPs := []string{}
 	for _, ip := range ips {
 		ip = strings.TrimSpace(ip)
@@ -53,4 +57,5 @@ func main() {
 		fmt.Printf("IP %d: %s\n", i+1, ip)
 	}
 	fmt.Printf("Total reachable IPs: %d\n", len(reachableIPs))
+
 }
