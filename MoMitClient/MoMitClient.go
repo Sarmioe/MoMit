@@ -110,7 +110,13 @@ func connectWebSocketTLS(ip string, port string, publicKey string) error {
 
 	url := fmt.Sprintf("wss://%s:%s", ip, port)
 
-	conn, _, err := websocket.DefaultDialer.Dial(url, &http.Header{})
+	dialer := websocket.Dialer{
+		TLSClientConfig:  tlsConfig,
+		Proxy:            http.ProxyFromEnvironment,
+		HandshakeTimeout: 45 * time.Second,
+	}
+
+	conn, _, err := dialer.Dial(url, http.Header{})
 	if err != nil {
 		return err
 	}
@@ -138,9 +144,7 @@ func createTLSConfig(publicKey string) (*tls.Config, error) {
 }
 
 func IV1(n int) {
-	fmt.Printf("IV1: %d\n", n)
 }
 
 func IV2(n int) {
-	fmt.Printf("IV2: %d\n", n)
 }

@@ -80,7 +80,6 @@ func generateCertificate(ip string) {
 		return
 	}
 
-	// 保存公钥到 [服务器IP].pem 文件
 	publicKeyFile := ip + ".pem"
 	publicKeyOut, err := os.Create(publicKeyFile)
 	if err != nil {
@@ -100,7 +99,6 @@ func generateCertificate(ip string) {
 		return
 	}
 
-	// 保存私钥到 key.key 文件
 	privateKeyFile := ip + "_key.key"
 	privateKeyOut, err := os.Create(privateKeyFile)
 	if err != nil {
