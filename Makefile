@@ -1,4 +1,4 @@
-.PHONY: all client server clean
+.PHONY: all client server debuild
 
 all: client server
 
@@ -12,6 +12,6 @@ server:
 	go build -o MoMitServer
 	@echo "Server built in MoMitServer folder"
 
-clean:
+debuild:
 	rm -rf MoMitClient/MoMitClient MoMitServer/MoMitServer
 	@echo "Deleted build files successfully"
