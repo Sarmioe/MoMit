@@ -48,7 +48,7 @@ func getIP(url string) (string, error) {
 	return strings.TrimSpace(string(ip)), nil
 }
 
-func generateCertificate() {
+func generateCertificate(ip string) {
 	priv, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	if err != nil {
 		logError(fmt.Errorf("Failed to generate private key: %w", err))
@@ -66,8 +66,9 @@ func generateCertificate() {
 		Subject: pkix.Name{
 			Organization: []string{"My Organization"},
 		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().Add(24 * time.Hour),
+		NotBefore: time.Now(),
+		NotAfter:  time.Now().Add(24 * time.Hour),
+
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
@@ -79,37 +80,47 @@ func generateCertificate() {
 		return
 	}
 
-	certFile, err := os.Create("cert.crt")
+	// 保存公钥到 [服务器IP].pem 文件
+	publicKeyFile := ip + ".pem"
+	publicKeyOut, err := os.Create(publicKeyFile)
 	if err != nil {
-		logError(fmt.Errorf("Failed to open cert.crt for writing: %w", err))
+		logError(fmt.Errorf("Failed to open %s for writing: %w", publicKeyFile, err))
 		return
 	}
-	defer certFile.Close()
+	defer publicKeyOut.Close()
 
-	if err := pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes}); err != nil {
-		logError(fmt.Errorf("Failed to write data to cert.crt: %w", err))
-		return
-	}
-
-	keyFile, err := os.Create("key.key")
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&priv.PublicKey)
 	if err != nil {
-		logError(fmt.Errorf("Failed to open key.key for writing: %w", err))
+		logError(fmt.Errorf("Failed to marshal public key: %w", err))
 		return
 	}
-	defer keyFile.Close()
 
-	privBytes, err := x509.MarshalECPrivateKey(priv)
+	if err := pem.Encode(publicKeyOut, &pem.Block{Type: "PUBLIC KEY", Bytes: publicKeyBytes}); err != nil {
+		logError(fmt.Errorf("Failed to write data to %s: %w", publicKeyFile, err))
+		return
+	}
+
+	// 保存私钥到 key.key 文件
+	privateKeyFile := ip + "_key.key"
+	privateKeyOut, err := os.Create(privateKeyFile)
+	if err != nil {
+		logError(fmt.Errorf("Failed to open %s for writing: %w", privateKeyFile, err))
+		return
+	}
+	defer privateKeyOut.Close()
+
+	privateKeyBytes, err := x509.MarshalECPrivateKey(priv)
 	if err != nil {
 		logError(fmt.Errorf("Failed to marshal private key: %w", err))
 		return
 	}
 
-	if err := pem.Encode(keyFile, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privBytes}); err != nil {
-		logError(fmt.Errorf("Failed to write data to key.key: %w", err))
+	if err := pem.Encode(privateKeyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateKeyBytes}); err != nil {
+		logError(fmt.Errorf("Failed to write data to %s: %w", privateKeyFile, err))
 		return
 	}
 
-	fmt.Println("Self-signed certificate and key have been generated:")
-	fmt.Println("Certificate: cert.crt")
-	fmt.Println("Private Key: key.key")
+	fmt.Printf("Self-signed certificate and key have been generated for IP %s:\n", ip)
+	fmt.Printf("Public Key: %s\n", publicKeyFile)
+	fmt.Printf("Private Key: %s\n", privateKeyFile)
 }

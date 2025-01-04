@@ -1,12 +1,21 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
+	"net/http"
+	"os/exec"
+	"runtime"
 	"strings"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 func main() {
@@ -31,31 +40,107 @@ func main() {
 	content := string(data)
 	fmt.Println("File content:", content)
 
-	ips := strings.Split(content, "\n")
-	if len(ips) < 2 || len(ips) > 10 {
-		log.Fatalf("Please provide between 2 and 10 IP addresses in the file.")
+	entries := strings.Split(content, "\n")
+	if len(entries) < 2 || len(entries) > 10 {
+		log.Fatalf("Please provide between 2 and 10 entries in the file.")
 	}
 
-	reachableIPs := []string{}
-	for _, ip := range ips {
-		ip = strings.TrimSpace(ip)
-		if ip != "" {
-			if isLoopback(ip) {
-				continue
-			}
-			if !isValidIP(ip) {
-				log.Fatalf("Invalid IP address: %s", ip)
-			}
-			if pingIP(ip) {
-				reachableIPs = append(reachableIPs, ip)
-			}
+	for _, entry := range entries {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+
+		parts := strings.Fields(entry)
+		if len(parts) != 3 {
+			log.Fatalf("Invalid entry format: %s", entry)
+		}
+
+		ip := parts[0]
+		port := parts[1]
+		publicKeyFile := ip + ".pem"
+
+		if isLoopback(ip) {
+			continue
+		}
+		if !isValidIP(ip) {
+			log.Fatalf("Invalid IP address: %s", ip)
+		}
+
+		publicKeyData, err := ioutil.ReadFile(publicKeyFile)
+		if err != nil {
+			log.Fatalf("Failed to read public key file %s: %v", publicKeyFile, err)
+		}
+
+		err = connectWebSocketTLS(ip, port, string(publicKeyData))
+		if err != nil {
+			log.Printf("Failed to connect to %s:%s: %v", ip, port, err)
 		}
 	}
+}
 
-	fmt.Println("Reachable IP addresses:")
-	for i, ip := range reachableIPs {
-		fmt.Printf("IP %d: %s\n", i+1, ip)
+func isLoopback(ip string) bool {
+	return ip == "127.0.0.1" || strings.ToLower(ip) == "localhost"
+}
+
+func isValidIP(ip string) bool {
+	return net.ParseIP(ip) != nil
+}
+
+func pingIP(ip string) bool {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("ping", "-n", "1", ip)
+	case "linux", "darwin":
+		cmd = exec.Command("ping", "-c", "1", ip)
+	default:
+		log.Fatalf("Unsupported operating system: %s", runtime.GOOS)
 	}
-	fmt.Printf("Total reachable IPs: %d\n", len(reachableIPs))
 
+	err := cmd.Run()
+	return err == nil
+}
+
+func connectWebSocketTLS(ip string, port string, publicKey string) error {
+	tlsConfig, err := createTLSConfig(publicKey)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("wss://%s:%s", ip, port)
+
+	conn, _, err := websocket.DefaultDialer.Dial(url, &http.Header{})
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	fmt.Printf("Successfully connected to %s:%s\n", ip, port)
+	return nil
+}
+
+func createTLSConfig(publicKey string) (*tls.Config, error) {
+	block, _ := pem.Decode([]byte(publicKey))
+	if block == nil || block.Type != "PUBLIC KEY" {
+		return nil, fmt.Errorf("failed to parse public key")
+	}
+
+	parsedKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	certPool.AddCert(&x509.Certificate{PublicKey: parsedKey})
+
+	return &tls.Config{RootCAs: certPool}, nil
+}
+
+func IV1(n int) {
+	fmt.Printf("IV1: %d\n", n)
+}
+
+func IV2(n int) {
+	fmt.Printf("IV2: %d\n", n)
 }

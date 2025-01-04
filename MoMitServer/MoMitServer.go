@@ -24,7 +24,7 @@ func main() {
 	fmt.Println("|_|  |_|\\___/|_|  |_|_|\\__|____/ \\___|_|    \\_/ \\___|_|")
 	fmt.Println("Server Public IPv4 Address:", ipv4)
 	fmt.Println("Server Public IPv6 Address:", ipv6)
-	generateCertificate()
-	fmt.Println("Created a TLS certificate for Websocket connections.")
+	generateCertificate(ipv4)
+	fmt.Println("Created a TLS certificate for Websocket connections by IPV4.")
 	fmt.Println("Wating for incoming connections...")
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func IV1(RandomIV1 int) {
-	fmt.Print("Random data is:", RandomIV1, " So, using ")
+	fmt.Print("Random data is:", RandomIV1, " Using ")
 	if RandomIV1 == 1 {
 		fmt.Print("TCP")
 	}
@@ -56,5 +56,4 @@ func IV2(RandomIV2 int) {
 	if RandomIV2 == 15 {
 		fmt.Println("random datas")
 	}
-	fmt.Println("Let's MoMit to encrypt your data packets.")
 }
