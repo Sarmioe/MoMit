@@ -20,13 +20,19 @@ jobs:
 
     - name: Append to updatelog
       run: |
-        echo "### Commit: ${{ github.event.head_commit.id }}" >> updatelog.md
-        echo "Author: ${{ github.event.head_commit.author.name }}" >> updatelog.md
-        echo "Date: ${{ github.event.head_commit.timestamp }}" >> updatelog.md
-        echo "Message: ${{ github.event.head_commit.message }}" >> updatelog.md
-        echo "Changed Files:" >> updatelog.md
-        echo "${{ env.CHANGED_FILES }}" | tr ' ' '\n' >> updatelog.md
-        echo "\n---\n" >> updatelog.md
+        echo "## 📝 Update Log" >> updatelog.md
+        echo "" >> updatelog.md
+        echo "### Commit Details" >> updatelog.md
+        echo "- **Commit ID**: \`${{ github.event.head_commit.id }}\`" >> updatelog.md
+        echo "- **Author**: ${{ github.event.head_commit.author.name }}" >> updatelog.md
+        echo "- **Date**: ${{ github.event.head_commit.timestamp }}" >> updatelog.md
+        echo "- **Message**: ${{ github.event.head_commit.message }}" >> updatelog.md
+        echo "" >> updatelog.md
+        echo "### Changed Files" >> updatelog.md
+        echo "" >> updatelog.md
+        echo "${{ env.CHANGED_FILES }}" | tr ' ' '\n' | sed 's/^/- /' >> updatelog.md
+        echo "" >> updatelog.md
+        echo "---" >> updatelog.md
 
     - name: Commit and push update log
       env:
@@ -36,5 +42,5 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
         git add updatelog.md
-        git commit -m "Update updatelog"
+        git commit -m "🔄 Update updatelog from Actions: Commit ${{ github.event.head_commit.id }}"
         git push
