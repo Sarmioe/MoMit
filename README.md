@@ -12,6 +12,15 @@
 >
 > Made by Golang , Why? Because it have high performance and easy learn.
 
+## Quick Start
+>Download MoMitClient and MoMitServer
+>Put MoMitServer on the server and start it
+>At this time, it will generate two key files. You only need to open the file ending with .pem. This key file is used to encrypt the key for transmitting the first few important data packets
+>Then you need to configure two servers according to the configuration of the first two steps (at least two, used to distract DPI attention, up to 10, of course, the more the better)
+>Then edit the ip.txt file in the local MoMitClient directory, delete the first few paragraphs, write the server's IP address, port number and public key (just paste the content of the public key pem format file directly)
+>Then start MoMitClient, it will automatically connect to the server randomly and start data transmission. You need to wait for a few seconds for the first few data packets to be transmitted
+>Then you need to wait for the client prompt, it will output your IP: port, and finally set the proxy server to its output, then directly visit the website with a browser to start encrypting your Internet traffic
+
 ## How to run build?
 
 > It support using makefile(GNU Makefile) and go build to run build.
