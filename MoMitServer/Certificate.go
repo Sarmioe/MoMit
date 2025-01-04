@@ -8,56 +8,21 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"math/big"
-	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
-var httpClient = &http.Client{
-	Timeout: 10 * time.Second,
-}
-
-func logError(err error) {
-	if err != nil {
-		logFile := time.Now().Format("2006-01-02_15-04-05") + ".log"
-		f, fileErr := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if fileErr != nil {
-			fmt.Println("Failed to create log file:", fileErr)
-			return
-		}
-		defer f.Close()
-		_, _ = f.WriteString(err.Error() + "\n")
-	}
-}
-
-func getIP(url string) (string, error) {
-	resp, err := httpClient.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	ip, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(string(ip)), nil
-}
-
 func generateCertificate(ip string) {
-	priv, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		logError(fmt.Errorf("Failed to generate private key: %w", err))
+		fmt.Printf("Failed to generate private key: %v\n", err)
 		return
 	}
 
 	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
 	if err != nil {
-		logError(fmt.Errorf("Failed to generate serial number: %w", err))
+		fmt.Printf("Failed to generate serial number: %v\n", err)
 		return
 	}
 
@@ -67,58 +32,53 @@ func generateCertificate(ip string) {
 			Organization: []string{"My Organization"},
 		},
 		NotBefore: time.Now(),
-		NotAfter:  time.Now().Add(24 * time.Hour),
-
-		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
+		NotAfter:  time.Now().Add(100 * 365 * 24 * time.Hour),
+		KeyUsage:  x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{
+			x509.ExtKeyUsageServerAuth,
+		},
 		BasicConstraintsValid: true,
 	}
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
 	if err != nil {
-		logError(fmt.Errorf("Failed to create certificate: %w", err))
+		fmt.Printf("Failed to create certificate: %v\n", err)
 		return
 	}
 
-	publicKeyFile := ip + ".pem"
-	publicKeyOut, err := os.Create(publicKeyFile)
+	certFile := ip + ".crt"
+	certOut, err := os.Create(certFile)
 	if err != nil {
-		logError(fmt.Errorf("Failed to open %s for writing: %w", publicKeyFile, err))
+		fmt.Printf("Failed to open %s for writing: %v\n", certFile, err)
 		return
 	}
-	defer publicKeyOut.Close()
+	defer certOut.Close()
 
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&priv.PublicKey)
+	if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes}); err != nil {
+		fmt.Printf("Failed to write certificate to %s: %v\n", certFile, err)
+		return
+	}
+
+	privFile := ip + ".key"
+	privOut, err := os.Create(privFile)
 	if err != nil {
-		logError(fmt.Errorf("Failed to marshal public key: %w", err))
+		fmt.Printf("Failed to open %s for writing: %v\n", privFile, err)
 		return
 	}
+	defer privOut.Close()
 
-	if err := pem.Encode(publicKeyOut, &pem.Block{Type: "PUBLIC KEY", Bytes: publicKeyBytes}); err != nil {
-		logError(fmt.Errorf("Failed to write data to %s: %w", publicKeyFile, err))
-		return
-	}
-
-	privateKeyFile := ip + "_key.key"
-	privateKeyOut, err := os.Create(privateKeyFile)
+	privBytes, err := x509.MarshalECPrivateKey(priv)
 	if err != nil {
-		logError(fmt.Errorf("Failed to open %s for writing: %w", privateKeyFile, err))
-		return
-	}
-	defer privateKeyOut.Close()
-
-	privateKeyBytes, err := x509.MarshalECPrivateKey(priv)
-	if err != nil {
-		logError(fmt.Errorf("Failed to marshal private key: %w", err))
+		fmt.Printf("Failed to marshal private key: %v\n", err)
 		return
 	}
 
-	if err := pem.Encode(privateKeyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateKeyBytes}); err != nil {
-		logError(fmt.Errorf("Failed to write data to %s: %w", privateKeyFile, err))
+	if err := pem.Encode(privOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privBytes}); err != nil {
+		fmt.Printf("Failed to write private key to %s: %v\n", privFile, err)
 		return
 	}
 
-	fmt.Printf("Self-signed certificate and key have been generated for IP %s:\n", ip)
-	fmt.Printf("Public Key: %s\n", publicKeyFile)
-	fmt.Printf("Private Key: %s\n", privateKeyFile)
+	fmt.Printf("Certificate and private key have been generated for IP %s:\n", ip)
+	fmt.Printf("Certificate: %s\n", certFile)
+	fmt.Printf("Private Key: %s\n", privFile)
 }
