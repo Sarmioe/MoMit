@@ -1,21 +1,12 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"net"
-	"net/http"
-	"os/exec"
-	"runtime"
 	"strings"
 	"time"
-
-	"github.com/gorilla/websocket"
 )
 
 func main() {
@@ -77,74 +68,4 @@ func main() {
 			log.Printf("Failed to connect to %s:%s: %v", ip, port, err)
 		}
 	}
-}
-
-func isLoopback(ip string) bool {
-	return ip == "127.0.0.1" || strings.ToLower(ip) == "localhost"
-}
-
-func isValidIP(ip string) bool {
-	return net.ParseIP(ip) != nil
-}
-
-func pingIP(ip string) bool {
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("ping", "-n", "1", ip)
-	case "linux", "darwin":
-		cmd = exec.Command("ping", "-c", "1", ip)
-	default:
-		log.Fatalf("Unsupported operating system: %s", runtime.GOOS)
-	}
-
-	err := cmd.Run()
-	return err == nil
-}
-
-func connectWebSocketTLS(ip string, port string, publicKey string) error {
-	tlsConfig, err := createTLSConfig(publicKey)
-	if err != nil {
-		return err
-	}
-
-	url := fmt.Sprintf("wss://%s:%s", ip, port)
-
-	dialer := websocket.Dialer{
-		TLSClientConfig:  tlsConfig,
-		Proxy:            http.ProxyFromEnvironment,
-		HandshakeTimeout: 45 * time.Second,
-	}
-
-	conn, _, err := dialer.Dial(url, http.Header{})
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	fmt.Printf("Successfully connected to %s:%s\n", ip, port)
-	return nil
-}
-
-func createTLSConfig(publicKey string) (*tls.Config, error) {
-	block, _ := pem.Decode([]byte(publicKey))
-	if block == nil || block.Type != "PUBLIC KEY" {
-		return nil, fmt.Errorf("failed to parse public key")
-	}
-
-	parsedKey, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	certPool := x509.NewCertPool()
-	certPool.AddCert(&x509.Certificate{PublicKey: parsedKey})
-
-	return &tls.Config{RootCAs: certPool}, nil
-}
-
-func IV1(n int) {
-}
-
-func IV2(n int) {
 }
