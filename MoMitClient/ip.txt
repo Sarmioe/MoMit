@@ -1,7 +1,1 @@
-It is a example file.
-you need change it to your own ip data.
-Min:2 servers High:10 servers
-It name is ip.txt.
-ip data like this:
-ip port publickey
-ip port publickey
+eafdf
