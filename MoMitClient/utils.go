@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"log"
 	"net"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -26,7 +28,36 @@ func pingIP(ip string) bool {
 	default:
 		log.Fatalf("Unsupported operating system: %s", runtime.GOOS)
 	}
-
 	err := cmd.Run()
 	return err == nil
+}
+
+func parseIPFile(filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("Error opening file: %v", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+		if len(parts) != 3 {
+			log.Printf("Invalid line format: %s", line)
+			continue
+		}
+
+		ip, port, publicKey := parts[0], parts[1], parts[2]
+		if isValidIP(ip) {
+			log.Printf("Valid IP: %s, Port: %s, PublicKey: %s", ip, port, publicKey)
+			if pingIP(ip) {
+				log.Printf("Ping successful for IP: %s", ip)
+			} else {
+				log.Printf("Ping failed for IP: %s", ip)
+			}
+		} else {
+			log.Printf("Invalid IP address: %s", ip)
+		}
+	}
 }

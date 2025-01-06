@@ -32,21 +32,26 @@ func main() {
 	fmt.Println("File content:", content)
 
 	entries := strings.Split(content, "\n")
-	if len(entries) < 2 || len(entries) > 10 {
-		log.Fatalf("Please provide between 2 and 10 entries in the file.")
-	}
+	validEntries := make([]string, 0)
 
 	for _, entry := range entries {
 		entry = strings.TrimSpace(entry)
 		if entry == "" {
 			continue
 		}
-
 		parts := strings.Fields(entry)
 		if len(parts) != 3 {
 			log.Fatalf("Invalid entry format: %s", entry)
 		}
+		validEntries = append(validEntries, entry)
+	}
 
+	if len(validEntries) < 2 || len(validEntries) > 10 {
+		log.Fatalf("Please provide between 2 and 10 valid entries in the file.")
+	}
+
+	for _, entry := range validEntries {
+		parts := strings.Fields(entry)
 		ip := parts[0]
 		port := parts[1]
 		publicKeyFile := ip + ".pem"
