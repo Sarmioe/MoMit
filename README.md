@@ -1,6 +1,6 @@
 # MoMit, Meet the world, freedom and private
 
-[Chinese Simplified](https://github.com/Sarmioe/MoMit/blob/main/Mo%20Mit%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.md)
+[Chinese Simplified](https://github.com/Sarmioe/MoMit/blob/dev/MoMit%E4%B8%AD%E6%96%87%E7%89%88%E6%96%87%E6%A1%A3.md)
 
 ## Introducing
 
