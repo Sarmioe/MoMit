@@ -30,39 +30,48 @@ func main() {
 	IV1(RandomIV1)
 	RandomIV2 := rand.Intn(7) + 9
 	IV2(RandomIV2)
+
 	filePath := "ip.txt"
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Fatalf("Failed to read file: %v", err)
 	}
+
 	content := string(data)
 	fmt.Println("File content:", content)
+
 	entries := strings.Split(content, "\n")
 	if len(entries) < 2 || len(entries) > 10 {
 		log.Fatalf("Please provide between 2 and 10 entries in the file.")
 	}
+
 	for _, entry := range entries {
 		entry = strings.TrimSpace(entry)
 		if entry == "" {
 			continue
 		}
+
 		parts := strings.Fields(entry)
 		if len(parts) != 3 {
 			log.Fatalf("Invalid entry format: %s", entry)
 		}
+
 		ip := parts[0]
 		port := parts[1]
 		publicKeyFile := ip + ".pem"
+
 		if isLoopback(ip) {
 			continue
 		}
 		if !isValidIP(ip) {
 			log.Fatalf("Invalid IP address: %s", ip)
 		}
+
 		publicKeyData, err := ioutil.ReadFile(publicKeyFile)
 		if err != nil {
 			log.Fatalf("Failed to read public key file %s: %v", publicKeyFile, err)
 		}
+
 		err = connectWebSocketTLS(ip, port, string(publicKeyData))
 		if err != nil {
 			log.Printf("Failed to connect to %s:%s: %v", ip, port, err)
